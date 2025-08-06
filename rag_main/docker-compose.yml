@@ -1,0 +1,14 @@
+# This file will orchestrate the different services using Docker Compose.
+
+# Services:
+# 1. `app`:
+#    - This will be the main Python application running `main.py`.
+#    - It will build from the current directory.
+#    - It needs to be connected to the same network as the sandbox.
+#    - Environment variables for API keys should be passed here.
+
+# 2. `sandbox`:
+#    - This will be the code execution environment.
+#    - It will build using the `Dockerfile` we defined.
+#    - It will expose the port (e.g., 8888) for the Kernel Gateway.
+#    - The `app` service will communicate with it on this port.

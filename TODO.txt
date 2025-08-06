@@ -1,0 +1,73 @@
+
+    1 +---------------------------------------------------------------------------------+
+    2 |                                  USER TASK                                      |
+    3 |                        (e.g., "Plot the stock price of GOOGL")                    |
+    4 +---------------------------------------------------------------------------------+
+    5                                        |
+    6                                        v
+    7 +---------------------------------------------------------------------------------+
+    8 | 1. Initialization (mint/main.py)                                                |
+    9 |    - The `main` function loads the experiment config (e.g., scienceqa.json).    |
+   10 |    - It dynamically imports and initializes the requested Tools (web_search,    |
+   11 |      python_tool, etc.).                                                        |
+   12 |    - It initializes the Agent (e.g., LMAgent).                                  |
+   13 |    - It calls `interactive_loop` to start the process.                          |
+   14 +---------------------------------------------------------------------------------+
+   15                                        |
+   16                                        v
+   17 +---------------------------------------------------------------------------------+
+   18 | 2. The Loop Begins (`while not state.finished:` in `interactive_loop`)          |
+   19 +---------------------------------------------------------------------------------+
+   20        |                                       ^
+   21        | (New Observation)                     | (Agent's Action)
+   22        v                                       |
+
+   23 +---------------------------------------------------------------------------------+
+   24 | 3. Agent's Turn: Decide Action (`agent.act(state)`)                             |
+   25 |    - The agent receives the current `State`, which contains the full history    |
+   26 |      of all previous actions and their results (observations).                  |
+   27 |    - It formats this history into a detailed prompt for the LLM.                |
+   28 |    - It calls the LLM, which returns a string containing its thought process    |
+   29 |      and the next action to take.                                               |
+   30 |      Example LLM Output:                                                        |
+   31 |      "thought: I need to find the stock data first. I'll use web search.        |
+   32 |       - web_search(query='GOOGL stock price')                                   |
+   33 |       "                                                                         |
+   34 |    - This string is parsed into a structured `Action` object.                   |
+   35 +---------------------------------------------------------------------------------+
+   36                                        |
+   37                                        v
+   38 +---------------------------------------------------------------------------------+
+   39 | 4. Environment's Turn: Execute Action (`env.step(action)`)                      |
+   40 |    - The `GeneralEnv` receives the `Action` object.                             |
+   41 |    - It identifies the tool to use (e.g., `web_search`).                         |
+   42 |    - It calls that tool's `__call__` method with the provided arguments.         |
+   43 |                                                                                 |
+   44 |    *** This is where the SANDBOXING happens: ***                                |
+   45 |    - If the action is `python(...)`, the `python_tool` sends the code to the    |
+   46 |      sandboxed Docker container (the Jupyter Kernel Gateway we found earlier).  |
+   47 |      The code runs there, not on your PC.                                       |
+   48 |    - If the action is `web_search(...)`, the tool makes a live API call.         |
+   49 +---------------------------------------------------------------------------------+
+   50                                        |
+   51                                        v
+   52 +---------------------------------------------------------------------------------+
+   53 | 5. State Update: Get Observation                                                |
+   54 |    - The tool returns a result (e.g., search results, stdout/stderr from the    |
+   55 |      code, or an error message).                                                |
+   56 |    - This result is the new "observation."                                      |
+   57 |    - The observation is appended to the `State`'s history.                      |
+   58 |    - The loop returns to Step 3, feeding the updated history to the agent.      |
+   59 +---------------------------------------------------------------------------------+
+   60        |
+   61        +-----> Loop continues until the agent decides the task is complete...
+   62        |
+   63        v
+   64 +---------------------------------------------------------------------------------+
+   65 | 6. Termination                                                                  |
+   66 |    - The agent eventually decides it has the final answer. It outputs a special |
+   67 |      action like `finish(answer="Here is the plot...")`.                         |
+   68 |    - The `env.step()` method sees the `finish` action and sets `state.finished` |
+   69 |      to `True`.                                                                 |
+   70 |    - The `while` loop in `interactive_loop` terminates.                         |
+   71 +---------------------------------------------------------------------------------+
