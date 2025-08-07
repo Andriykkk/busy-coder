@@ -278,6 +278,11 @@ def main():
     parser.add_argument("--save_steps", type=int, default=500, help="Save checkpoint every X updates steps.")
     parser.add_argument("--num_proc", type=int, default=4, help="Number of processes to use for data processing.")
 
+    # --- Saving Arguments ---
+    parser.add_argument("--save_merged_model", action='store_true', help="Merge adapter and save full model.")
+    parser.add_argument("--save_separated_model", action='store_true', help="Save adapter and save full model separately.(In development)")
+    parser.add_argument("--save_tokenizer", action='store_true', help="Save tokenizer with the model.")
+
     args = parser.parse_args()
 
     print("--- Parsed Arguments ---")
@@ -391,6 +396,37 @@ def main():
     final_adapter_path = os.path.join(args.output_dir, "final_adapter")
     print(f"Saving final adapter to {final_adapter_path}")
     model.save_pretrained(final_adapter_path)
+
+    # --- Save Merged Model and Tokenizer ---
+    if args.save_merged_model:
+        print("\n--- Merging and Saving Final Model ---")
+        
+        # Merge the LoRA adapter with the base model
+        try:
+            # merge_and_unload() unloads the LoRA weights and merges them with the base model
+            model = model.merge_and_unload()
+            print("Model merged successfully.")
+        except Exception as e:
+            print(f"Error during model merging: {e}")
+
+        # Define the path for the final merged model
+        final_model_path = os.path.join(args.output_dir, "final_merged_model")
+        os.makedirs(final_model_path, exist_ok=True)
+
+        print(f"Saving merged model to {final_model_path}")
+        try:
+            model.save_pretrained(final_model_path)
+            print("Merged model saved successfully.")
+        except Exception as e:
+            print(f"Error saving merged model: {e}")
+
+        if args.save_tokenizer:
+            print(f"Saving tokenizer to {final_model_path}")
+            try:
+                tokenizer.save_pretrained(final_model_path)
+                print("Tokenizer saved successfully.")
+            except Exception as e:
+                print(f"Error saving tokenizer: {e}")
 
 
 if __name__ == "__main__":

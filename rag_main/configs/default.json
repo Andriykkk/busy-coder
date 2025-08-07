@@ -1,0 +1,4 @@
+{
+  "model_path": "/path/to/your/output/final_merged_model",
+  "sandbox_url": "http://localhost:8888"
+}

@@ -52,7 +52,8 @@ python train.py \
     --gradient_checkpointing \
     --logging_steps 10 \
     --save_steps 200 \
-    --seed 42
+    --seed 42 \
+    --save_merged_model
 
 
 echo "--- Training Finished ---"

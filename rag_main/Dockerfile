@@ -1,14 +1,22 @@
-# This file defines the Docker environment for sandboxed code execution.
+# Use a pre-built data science image as the base
+# This includes Python, Jupyter, and common libraries like pandas, numpy, scikit-learn, etc.
+FROM jupyter/datascience-notebook:latest
 
-# Base Image:
-# - Start from a data science image like `jupyter/datascience-notebook`
-#   as it comes pre-installed with pandas, numpy, matplotlib, etc.
+# Add any additional libraries that the agent might need to use inside the sandbox
+# For example, for web scraping or other specific tasks.
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    # Add any system-level dependencies here if needed
+    && rm -rf /var/lib/apt/lists/*
+USER ${NB_UID}
 
-# Dependencies:
-# - Add any other specific Python libraries the agent might need to install via pip.
-#   (e.g., `pip install scikit-learn beautifulsoup4`)
+RUN pip install --no-cache-dir \
+    beautifulsoup4 \
+    requests
 
-# Entrypoint:
-# - The command to start the Jupyter Kernel Gateway.
-# - This will expose an endpoint that can receive and execute code.
-#   CMD ["jupyter", "kernelgateway", "--KernelGatewayApp.ip=0.0.0.0", "--KernelGatewayApp.port=8888"]
+# Expose the default port for the Jupyter Kernel Gateway
+EXPOSE 8888
+
+# The command to start the kernel gateway when the container runs.
+# This makes the container listen for code execution requests.
+CMD ["jupyter", "kernelgateway", "--KernelGatewayApp.ip=0.0.0.0", "--KernelGatewayApp.port=8888"]

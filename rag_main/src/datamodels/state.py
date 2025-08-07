@@ -33,11 +33,7 @@ class State(BaseModel):
 
     @property
     def summary(self) -> str:
-        """Provides a brief summary of the current state."""
-        if self.finished:
-            status = "Succeeded" if self.success else "Failed"
-            return f"Task finished with status: {status}"
-        return f"Task ongoing. Last observation: {self.observation[:100]}..."
+        return f"Task: {self.task}\nFinished: {self.finished}\nSuccess: {self.success}"
 
     def add_to_history(self, thought: str, action: Action, observation: str):
         """Helper method to append a new step to the history."""

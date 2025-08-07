@@ -1,0 +1,13 @@
+# Core Libraries
+openai
+langchain
+langchain-community
+requests
+python-dotenv
+duckduckgo-search
+websocket-client
+
+# For data models:
+pydantic
+
+# Add any other libraries needed by the tools or agent.

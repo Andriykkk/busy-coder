@@ -1,14 +1,35 @@
-# This file will orchestrate the different services using Docker Compose.
+version: '3.8'
 
-# Services:
-# 1. `app`:
-#    - This will be the main Python application running `main.py`.
-#    - It will build from the current directory.
-#    - It needs to be connected to the same network as the sandbox.
-#    - Environment variables for API keys should be passed here.
+services:
+  # The main application service
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.app # A separate Dockerfile for the app itself
+    container_name: code_act_app
+    command: python main.py --config /app/configs/default.json
+    volumes:
+      # Mount the entire project directory to allow for live code changes
+      - .:/app
+    networks:
+      - code-act-net
+    depends_on:
+      - sandbox
+    env_file:
+      - .env # Pass environment variables from a .env file
 
-# 2. `sandbox`:
-#    - This will be the code execution environment.
-#    - It will build using the `Dockerfile` we defined.
-#    - It will expose the port (e.g., 8888) for the Kernel Gateway.
-#    - The `app` service will communicate with it on this port.
+  # The sandboxed code execution service
+  sandbox:
+    build:
+      context: .
+      dockerfile: Dockerfile # Uses the Dockerfile we created for the sandbox
+    container_name: code_act_sandbox
+    ports:
+      # Expose the sandbox port to the host machine for potential debugging
+      - "8888:8888"
+    networks:
+      - code-act-net
+
+networks:
+  code-act-net:
+    driver: bridge
