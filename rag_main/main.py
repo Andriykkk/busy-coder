@@ -20,12 +20,12 @@ logging.basicConfig(
 LOGGER = logging.getLogger("CodeActAgent")
 
 
-def interactive_loop(agent: ReactAgent, env: Sandbox, task: str):
+def interactive_loop(agent: ReactAgent, env: Sandbox, task: str, interaction_limit: int, solution_limit: int):
     """
     The core interaction loop for the agent.
     """
     LOGGER.info(f"Starting new task: {task}")
-    state = env.reset(task)
+    state = env.reset(task, interaction_limit=interaction_limit, solution_limit=solution_limit)
     LOGGER.info(f"Initial observation:\n\033[94m{state.observation}\033[0m")
 
     while not state.finished:
@@ -85,17 +85,24 @@ def main():
 
     # 3. Initialize Environment and Agent
     env = Sandbox(tools)
-    agent = ReactAgent(llm_client={"model": model, "tokenizer": tokenizer}, tools=tools)
+    agent = ReactAgent(
+        llm_client={"model": model, "tokenizer": tokenizer},
+        tools=tools,
+        max_new_tokens=exp_config.get("max_new_tokens", 512),
+        stop_on_eos=exp_config.get("stop_on_eos", True)
+    )
 
     LOGGER.info("Initialization complete.")
 
     # --- Start Interactive Session ---
+    interaction_limit = exp_config.get("interaction_limit", 5)
+    solution_limit = exp_config.get("solution_limit", 2)
     try:
         while True:
             task = input("\033[95m\nEnter your task (or 'exit' to quit):\n> \033[0m")
             if task.lower() == 'exit':
                 break
-            interactive_loop(agent, env, task)
+            interactive_loop(agent, env, task, interaction_limit, solution_limit)
     except KeyboardInterrupt:
         LOGGER.info("\nInterrupted by user. Exiting.")
 

@@ -1,4 +1,8 @@
 {
   "model_path": "/path/to/your/output/final_merged_model",
-  "sandbox_url": "http://localhost:8888"
+  "sandbox_url": "http://localhost:8888",
+  "interaction_limit": 5,
+  "solution_limit": 2,
+  "max_new_tokens": 512,
+  "stop_on_eos": true
 }

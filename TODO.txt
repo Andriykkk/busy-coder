@@ -6,7 +6,6 @@
        * What to Change: You will need to implement the full kernel lifecycle management in your CodeExecutorTool. This involves making multiple requests calls: one to start a kernel, and then using a websocket
          client library (like websocket-client in Python) to connect to the kernel's channel and send the execution request.
 
-1. add max new tokens in act, max steps, max solutions in agent
 2. look at code_executor
 
     1 +---------------------------------------------------------------------------------+

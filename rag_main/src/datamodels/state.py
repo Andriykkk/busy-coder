@@ -1,41 +1,48 @@
-from pydantic import BaseModel, Field
 from typing import List, Tuple
+from .action import Action
 
-from .action import Action # Import the Action model from the same directory
-
-class State(BaseModel):
+class State:
     """
-    Represents the complete state of the agent-environment interaction at any point.
-
-    This object is passed back and forth between the agent and the environment,
-    accumulating the history of the interaction.
+    Represents the state of the agent-environment interaction, including turn limits.
     """
-    task: str = Field(
-        ...,
-        description="The initial, high-level task assigned by the user."
-    )
-    history: List[Tuple[str, Action, str]] = Field(
-        default_factory=list,
-        description="A list of (thought, action, observation) triplets, recording the interaction history."
-    )
-    observation: str = Field(
-        "",
-        description="The most recent observation from the environment after the last action."
-    )
-    finished: bool = Field(
-        False,
-        description="A flag indicating whether the task has been completed."
-    )
-    success: bool = Field(
-        False,
-        description="A flag indicating whether the task was completed successfully."
-    )
+    def __init__(self, task: str, observation: str, interaction_limit: int = 5, solution_limit: int = 2):
+        self.task: str = task
+        self.history: List[Tuple[str, Action, str]] = []
+        self.observation: str = observation
+        
+        # Core state flags
+        self.finished: bool = False
+        self.success: bool = False
+        
+        # Turn counting and limits
+        self.interaction_limit: int = interaction_limit
+        self.solution_limit: int = solution_limit
+        self.interaction_count: int = 0
+        self.solution_attempts: int = 0
+
+    def add_to_history(self, thought: str, action: Action, observation: str):
+        """Adds a new step to the history and increments the interaction counter."""
+        self.history.append((thought, action, observation))
+        self.observation = observation
+        self.interaction_count += 1
+        
+        if action.tool_name == "finish":
+            self.solution_attempts += 1
+
+    @property
+    def interactions_left(self) -> int:
+        return self.interaction_limit - self.interaction_count
+
+    @property
+    def solutions_left(self) -> int:
+        return self.solution_limit - self.solution_attempts
 
     @property
     def summary(self) -> str:
-        return f"Task: {self.task}\nFinished: {self.finished}\nSuccess: {self.success}"
+        return (
+            f"Task: {self.task}\n"
+            f"Finished: {self.finished}, Success: {self.success}\n"
+            f"Turns Taken: {self.interaction_count}/{self.interaction_limit}\n"
+            f"Solutions Attempted: {self.solution_attempts}/{self.solution_limit}"
+        )
 
-    def add_to_history(self, thought: str, action: Action, observation: str):
-        """Helper method to append a new step to the history."""
-        self.history.append((thought, action, observation))
-        self.observation = observation
