@@ -3,25 +3,12 @@
 This file outlines the steps to implement a comprehensive evaluation for the model.
 
 ## 1. Environment Setup
-
-- [ ] Create a conda environment from the `environment.yml` file in `code-act`.
+ 
 - [ ] Install all necessary dependencies from `requirements.txt` files in `code-act` and its submodules.
-- [ ] Set up the `OPENAI_API_KEY` as an environment variable.
 
 ## 2. Data Setup
 
-- [ ] Run the `setup_data.sh` script in `code-act/scripts/eval` to download and prepare all evaluation datasets.
-
-## 3. Model Serving
-
-- [ ] Implement a script to serve the model using an OpenAI-compatible API. This can be based on vLLM or another serving framework. The script should be configurable to load different model checkpoints.
-
-## 4. Evaluation Benchmarks
-
-Implement scripts to run the following benchmarks. Each script should:
-- Take the model endpoint as an argument.
-- Run the evaluation for the specific benchmark.
-- Save the results in a structured format (e.g., JSON) in a designated output directory.
+- [x] Run the `setup_data.sh` script in `code-act/scripts/eval` to download and prepare all evaluation datasets.
 
 ### 4.1. M³ToolEval
 

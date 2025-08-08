@@ -40,6 +40,21 @@ def run_mint_bench(model_path, output_dir):
     print(f"Executing command:\n{command}")
     # subprocess.run(command, shell=True, check=True)
 
+def run_mmlu(model_path, output_dir, ntrain, data_dir):
+    """
+    Runs the MMLU benchmark.
+    """
+    print("Running MMLU...")
+    command = f"""
+    python3 mmlu/evaluate_mmlu.py \
+        --model {model_path} \
+        --save_dir {output_dir}/mmlu \
+        --data_dir {data_dir} \
+        --ntrain {ntrain}
+    """
+    print(f"Executing command:\n{command}")
+    subprocess.run(command, shell=True, check=True)
+
 def main():
     parser = argparse.ArgumentParser(description="Run evaluation benchmarks for a given model.")
     parser.add_argument("--model_path", type=str, required=True, help="Path to the model checkpoint.")
@@ -47,8 +62,13 @@ def main():
     parser.add_argument("--output_dir", type=str, default="results", help="Directory to save the evaluation results.")
     parser.add_argument("--api_base", type=str, default="http://localhost", help="Base URL for the model's API.")
     parser.add_argument("--api_port", type=int, default=8080, help="Port for the model's API.")
+    # M³ToolEval specific arguments
     parser.add_argument("--action_mode", type=str, default="code_as_action", choices=["text_as_action", "json_as_action", "code_as_action"], help="Action mode for M³ToolEval.")
     parser.add_argument("--task_regex_filter", type=str, default=".*", help="Regex to filter tasks for M³ToolEval.")
+    # MMLU specific arguments
+    parser.add_argument("--ntrain", "-k", type=int, default=5, help="Number of few-shot examples to use for MMLU.")
+    parser.add_argument("--mmlu_data_dir", type=str, default="data/eval/mmlu", help="Directory where MMLU data is stored.")
+
 
     args = parser.parse_args()
 
@@ -66,6 +86,9 @@ def main():
 
     if "mint-bench" in args.tests:
         run_mint_bench(args.model_path, args.output_dir)
+
+    if "mmlu" in args.tests:
+        run_mmlu(args.model_path, args.output_dir, args.ntrain, args.mmlu_data_dir)
 
     # Add other tests here...
 
