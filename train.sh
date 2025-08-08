@@ -16,7 +16,7 @@ MODEL_NAME="sbintuitions/tiny-lm-chat"
 
 # Directory to save the final LoRA adapter and any intermediate checkpoints.
 # A timestamp is added to prevent overwriting previous runs.
-OUTPUT_DIR="./output/Qwen2-0.5B-qlora-$(date +%s)"
+OUTPUT_DIR="./output/sbintuitions/tiny-lm-chat-qlora-$(date +%s)"
 
 # A dedicated path to save the processed dataset. This avoids
 # re-downloading and re-processing the data on every run.
@@ -28,7 +28,7 @@ echo "Starting QLoRA fine-tuning..."
 echo "Model: $MODEL_NAME"
 echo "Output Directory: $OUTPUT_DIR"
 
-python train.py \
+python3.10 train/main.py \
     --model_name_or_path "$MODEL_NAME" \
     --output_dir "$OUTPUT_DIR" \
     --dataset_name "xingyaoww/code-act" \
@@ -46,7 +46,7 @@ python train.py \
     --bf16 \
     --learning_rate 2e-4 \
     --lr_scheduler_type "constant" \
-    --max_steps 2000 \
+    --max_steps 20 \
     --per_device_train_batch_size 2 \
     --gradient_accumulation_steps 8 \
     --gradient_checkpointing \

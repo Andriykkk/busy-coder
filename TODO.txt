@@ -7,6 +7,7 @@
          client library (like websocket-client in Python) to connect to the kernel's channel and send the execution request.
 
 2. look at code_executor
+3. add maximum size for context for thoughts
 
     1 +---------------------------------------------------------------------------------+
     2 |                                  USER TASK                                      |
